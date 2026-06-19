@@ -3,6 +3,25 @@
 Tracks substantive edits to the article, not the original draft as written.
 Tag naming follows [`/VERSIONING.md`](../../VERSIONING.md).
 
+## v0.6, refactor: move code/ and diagrams/ inside pt/, add real Memory/ source
+
+- supersedes: `articles/cortex-memory-architecture/v0.5`
+- Moved `diagrams/` and `code/` from the article root into `pt/`, since
+  their comments and captions are in Portuguese; they belong with the
+  Portuguese article, not shared at the article root. When `en/` is
+  published, it gets its own `code/` and `diagrams/` with English text,
+  not a shared copy.
+- Added `pt/code/Memory/`: the real implementation files for the four
+  layers (`MemoryBus`, `WorkingMemory`, `EpisodicMemory`, `SemanticMemory`
+  + `SemanticValidator`, `ProceduralMemory`, plus `Episodic/` and
+  `Policy/` subfolders), mirroring the actual CortexOS namespace
+  structure. Previously only the migrations were included; the article
+  now ships the actual classes its claims describe (the 3-confirmation
+  / 0.80-confidence rule in `SemanticValidator`, the 20-sample /
+  0.85-success-rate rule in `ProceduralMemory`, etc.).
+- Fixed every internal link in `pt/article.md` and `pt/code/README.md`
+  to the new paths.
+
 ## v0.5, feat: link to published Medium article, source migrations
 
 - supersedes: `articles/cortex-memory-architecture/v0.4`

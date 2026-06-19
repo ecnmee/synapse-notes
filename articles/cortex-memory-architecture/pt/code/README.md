@@ -1,8 +1,22 @@
-# code/ - excertos de schema que sustentam este artigo
+# code/ - excertos de schema e implementação que sustentam este artigo
 
-Migrations reais (anonimizadas onde necessário) que correspondem 1:1 às
-afirmações feitas em `pt/article.md`. Cada uma é referenciada explicitamente
-no texto ou nos diagramas.
+Implementação real (anonimizada onde necessário) das 4 camadas de memória
+e as migrations correspondentes. Cada ficheiro é referenciado explicitamente
+no texto ou nos diagramas de `pt/article.md`.
+
+## Memory/
+
+Implementação concreta das 4 camadas e da fachada que as une:
+
+| Ficheiro | Camada / papel |
+|---|---|
+| `MemoryBus.php`, `MemoryBusInterface.php` | A fachada única citada na secção "Tudo passa por um único ponto". |
+| `WorkingMemory.php`, `WorkingMemoryInterface.php` | Working Memory: cache com TTL, merge incremental. |
+| `EpisodicMemory.php`, `EpisodicMemoryInterface.php` | Episodic Memory: busca por similaridade, persistência assíncrona. |
+| `SemanticMemory.php`, `SemanticValidator.php` | Semantic Memory: pipeline `propose()` → `validate()`, os limiares de 3 confirmações e confiança 0.80 citados no artigo. |
+| `ProceduralMemory.php`, `ProceduralMemoryInterface.php` | Procedural Memory: `propose()`, `recordOutcome()`, activação automática em `sample_size >= 20` e `success_rate >= 0.85`. |
+| `Episodic/Episode.php`, `EpisodeOutcome.php`, `EpisodeRepository.php`, `EpisodeRepositoryInterface.php` | Modelo de domínio do episódio e a sua persistência. |
+| `Policy/PolicyObservationRepository.php` | Telemetria de política, mencionada como "sem pipeline candidate/active" na secção do `MemoryBus`. |
 
 ## migrations/
 

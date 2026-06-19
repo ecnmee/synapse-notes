@@ -9,21 +9,22 @@ num prompt.
 ## Conteúdo
 
 - [`pt/article.md`](./pt/article.md): o artigo publicado, em português (Angola). Publicado no Medium: https://medium.com/@ecnmee/as-4-camadas-de-mem%C3%B3ria-que-podem-mudar-a-forma-como-constru%C3%ADmos-agentes-de-ia-24ad18c26dd0
-- [`en/`](./en): versão em inglês, ainda pendente. Ver [`en/README.md`](./en/README.md) para o motivo.
-- [`diagrams/`](./diagrams): fontes SVG dos três diagramas referenciados no artigo:
+- [`pt/diagrams/`](./pt/diagrams): fontes SVG dos três diagramas referenciados no artigo (legendas em português):
   - `01-four-layers.svg`: as quatro camadas de memória e o seu modelo de persistência.
   - `02-memory-bus-facade.svg`: como o `MemoryBus` isola os consumidores do armazenamento concreto.
   - `03-learning-cycle.svg`: o ciclo de candidato, validação, promoção.
-- [`code/`](./code): excertos reais de schema (migrations) que sustentam cada afirmação técnica do artigo. Ver [`code/README.md`](./code/README.md) para o mapeamento ficheiro-a-afirmação e o porquê de outros ficheiros enviados não estarem aqui.
+- [`pt/code/`](./pt/code): implementação real (`Memory/`) e migrations que sustentam cada afirmação técnica do artigo, comentários em português. Ver [`pt/code/README.md`](./pt/code/README.md) para o mapeamento ficheiro-a-afirmação.
 - [`pt/REFERENCES.md`](./pt/REFERENCES.md): bibliografia completa, com notas sobre onde esta arquitectura segue trabalho anterior e onde diverge.
+- [`en/`](./en): versão em inglês, ainda pendente. Quando o código for traduzido, `en/code/` e `en/diagrams/` seguem a mesma estrutura de `pt/`. Ver [`en/README.md`](./en/README.md).
 - [`CHANGELOG.md`](./CHANGELOG.md): o que mudou entre versões, e porquê.
 
-## Porquê só português, por agora
+## Porquê código e diagramas dentro de pt/
 
-O código fonte do CortexOS (comentários, docblocks) está actualmente todo
-em português. O artigo e o código devem manter-se sincronizados, por isso
-a tradução para inglês só será publicada depois dos comentários do código
-serem traduzidos, não antes.
+Os comentários do código real e as legendas dos diagramas estão em
+português, por isso vivem dentro de `pt/`, junto do artigo que os usa como
+prova. Quando a versão inglesa existir (depois dos comentários do CortexOS
+serem traduzidos), `en/` terá a sua própria cópia de `code/` e `diagrams/`
+com texto em inglês, em vez de partilhar ficheiros entre as duas versões.
 
 ## Versionamento
 

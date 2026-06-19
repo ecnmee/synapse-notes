@@ -1,8 +1,8 @@
 ---
 type: feat
-version: v0.5
+version: v0.6
 date: 2026-06-19
-supersedes: articles/cortex-memory-architecture/v0.4
+supersedes: articles/cortex-memory-architecture/v0.5
 lang: pt-AO
 companion: pending (ver ../en/README.md)
 references: ./REFERENCES.md
@@ -43,7 +43,7 @@ Para o Simplifika, eu queria algo diferente, uma versão 2 do kernel, mas com ca
 
 Em vez de "contexto + RAG", estruturei a memória do CortexOS em **quatro camadas**, cada uma com uma responsabilidade clara e uma forma de persistência diferente.
 
-![As 4 camadas de memória do CortexOS](../diagrams/01-four-layers.svg)
+![As 4 camadas de memória do CortexOS](./diagrams/01-four-layers.svg)
 
 ### 1. Working Memory, a RAM do agente
 
@@ -73,7 +73,7 @@ Quando um procedimento atinge **pelo menos 20 execuções observadas** e uma tax
 
 Nenhuma parte do agente acede a uma camada de memória directamente. Toda a leitura e escrita passa por uma fachada única, o `MemoryBus`.
 
-![MemoryBus como fachada única de acesso](../diagrams/02-memory-bus-facade.svg)
+![MemoryBus como fachada única de acesso](./diagrams/02-memory-bus-facade.svg)
 
 Isto traz duas vantagens práticas, que só ficaram óbvias depois de testar o sistema:
 
@@ -84,7 +84,7 @@ Isto traz duas vantagens práticas, que só ficaram óbvias depois de testar o s
 
 Ter quatro camadas separadas, por si só, não resolve nada. O que importa é o ciclo completo:
 
-![O ciclo de aprendizagem: execução → traços → Learner → validação → promoção](../diagrams/03-learning-cycle.svg)
+![O ciclo de aprendizagem: execução → traços → Learner → validação → promoção](./diagrams/03-learning-cycle.svg)
 
 Agente executa → gera traços (episódios, resultados de tools) → o Learner analisa e produz candidatos → o validador promove o que é suficientemente confiável → a memória é actualizada → a próxima conversa já usa o que foi aprendido, sem voltar a "descobrir" a mesma coisa.
 
@@ -120,7 +120,7 @@ Este artigo apoia-se em trabalho publicado, não inventa os conceitos do zero:
 
 Lista completa, com notas sobre onde o CortexOS segue a literatura e onde diverge, em [`REFERENCES.md`](./REFERENCES.md).
 
-Para avaliar o código (excertos reais, anonimizados) por trás de cada afirmação técnica deste artigo, aceda a [`synapse-notes/articles/cortex-memory-architecture`](https://github.com/ecnmee/synapse-notes/tree/main/articles/cortex-memory-architecture).
+Para avaliar o código (excertos reais, anonimizados) por trás de cada afirmação técnica deste artigo, aceda a [`synapse-notes/articles/cortex-memory-architecture/pt/code`](https://github.com/ecnmee/synapse-notes/tree/main/articles/cortex-memory-architecture/pt/code).
 
 ---
 
