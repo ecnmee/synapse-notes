@@ -18,27 +18,31 @@ decide whether an agent actually gets *better* over time, or just gets
 
 ## Index
 
-| Article | Topic | Languages | Status |
+| Article | Topic | Idiomas | Estado |
 |---|---|---|---|
-| [`cortex-memory-architecture`](./articles/cortex-memory-architecture) | A 4-layer memory architecture (Working / Episodic / Semantic / Procedural) for PHP-based AI agents | PT-AO, EN | v0.3 |
+| [`cortex-memory-architecture`](./articles/cortex-memory-architecture) | Uma arquitectura de memória em 4 camadas (Working / Episodic / Semantic / Procedural) para agentes de IA em PHP | PT | v0.4 (EN pendente) |
 
 ## Conventions
 
-- **Language**: every article is published in at least Portuguese (Angola)
-  and English, as two separate files that link to each other; code,
-  diagrams and folder/file names are always in English.
-- **`diagrams/`**: SVG sources, no binary exports, so diffs stay readable.
-- **Versioning**: every article carries a metadata header (`type`,
-  `version`, `date`, `supersedes`). See [`VERSIONING.md`](./VERSIONING.md)
-  for the full convention: an updated idea never silently overwrites a
-  published version, it links back to it explicitly.
-- **`REFERENCES.md`** inside each article folder: the bibliography behind
-  every non-trivial claim, with a note on what's drawn from prior work and
-  what's this system's own operational decision.
-- **`CHANGELOG.md`** inside each article folder tracks substantive edits,
-  not typos, but changes to claims, structure, or technical accuracy.
-- Code excerpts are anonymized/trimmed from a real system; they illustrate
-  a pattern, not a tutorial to copy-paste.
+- **Idioma**: cada artigo tem uma pasta `pt/` e uma pasta `en/`. A versão
+  inglesa só é publicada quando o código fonte que o artigo documenta já
+  tiver os comentários traduzidos, para o artigo nunca ficar adiantado em
+  relação ao código. Código, diagramas e nomes de pastas/ficheiros estão
+  sempre em inglês.
+- **`diagrams/`**: fontes SVG, sem exportações binárias, para os diffs
+  ficarem legíveis.
+- **Versionamento**: cada artigo tem um cabeçalho de metadata (`type`,
+  `version`, `date`, `supersedes`). Ver [`VERSIONING.md`](./VERSIONING.md)
+  para a convenção completa: uma ideia actualizada nunca substitui uma
+  versão publicada em silêncio, ela liga explicitamente para a anterior.
+- **`REFERENCES.md`** dentro de cada pasta de artigo: a bibliografia por
+  trás de cada afirmação não trivial, com nota sobre o que vem de trabalho
+  anterior e o que é decisão operacional própria deste sistema.
+- **`CHANGELOG.md`** dentro de cada pasta de artigo: regista edições
+  substanciais, não erros de digitação, mas alterações a afirmações,
+  estrutura, ou precisão técnica.
+- Excertos de código são anonimizados/reduzidos de um sistema real;
+  ilustram um padrão, não são um tutorial para copiar e colar.
 
 ## Author
 

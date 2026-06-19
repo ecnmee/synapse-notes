@@ -1,35 +1,46 @@
 # cortex-memory-architecture
 
-A 4-layer memory architecture (**Working / Episodic / Semantic / Procedural**)
-for a PHP/Laravel-based AI agent kernel (CortexOS), built behind a single
-`MemoryBus` facade with a real candidate, validate, promote learning
-pipeline, not just vector search wrapped in a prompt.
+Uma arquitectura de memória em 4 camadas (**Working / Episodic / Semantic /
+Procedural**) para um kernel de agente de IA em PHP/Laravel (CortexOS),
+construída por trás de uma única fachada `MemoryBus`, com um pipeline real
+de candidato, validação, promoção, e não apenas busca vectorial envolta
+num prompt.
 
-## Contents
+## Conteúdo
 
-- [`article.pt-AO.md`](./article.pt-AO.md), [`article.en.md`](./article.en.md): the published article, in Portuguese (Angola) and English. Same content, kept in sync.
-- [`diagrams/`](./diagrams): SVG sources for the three diagrams referenced in the article:
-  - `01-four-layers.svg`: the four memory layers and their persistence model.
-  - `02-memory-bus-facade.svg`: how the `MemoryBus` isolates consumers from concrete storage.
-  - `03-learning-cycle.svg`: the candidate, validate, promote feedback loop.
-- [`REFERENCES.md`](./REFERENCES.md): full bibliography, with notes on where this architecture follows prior work and where it diverges.
-- [`CHANGELOG.md`](./CHANGELOG.md): what changed between versions, and why.
+- [`pt/article.md`](./pt/article.md): o artigo publicado, em português (Angola).
+- [`en/`](./en): versão em inglês, ainda pendente. Ver [`en/README.md`](./en/README.md) para o motivo.
+- [`diagrams/`](./diagrams): fontes SVG dos três diagramas referenciados no artigo:
+  - `01-four-layers.svg`: as quatro camadas de memória e o seu modelo de persistência.
+  - `02-memory-bus-facade.svg`: como o `MemoryBus` isola os consumidores do armazenamento concreto.
+  - `03-learning-cycle.svg`: o ciclo de candidato, validação, promoção.
+- [`pt/REFERENCES.md`](./pt/REFERENCES.md): bibliografia completa, com notas sobre onde esta arquitectura segue trabalho anterior e onde diverge.
+- [`CHANGELOG.md`](./CHANGELOG.md): o que mudou entre versões, e porquê.
 
-## Versioning
+## Porquê só português, por agora
 
-Each article file starts with a metadata header (`type`, `version`, `date`,
-`supersedes`). See [`/VERSIONING.md`](../../VERSIONING.md) at the repo root
-for the full convention: every substantive edit bumps the version, gets a
-git tag, and the new version explicitly links back to the one it replaces.
-Old versions stay reachable at their tag.
+O código fonte do CortexOS (comentários, docblocks) está actualmente todo
+em português. O artigo e o código devem manter-se sincronizados, por isso
+a tradução para inglês só será publicada depois dos comentários do código
+serem traduzidos, não antes.
 
-## Core ideas, in one paragraph
+## Versionamento
 
-Most agent frameworks optimize for *retrieval*. This architecture optimizes
-for *accumulation and validation*: facts and procedures enter as unvalidated
-candidates, get promoted only after meeting explicit thresholds (confirmation
-count, confidence average, sample size, success rate), and, critically,
-candidates are never deleted or edited. Corrections create new records;
-the old ones stay for audit. That single governance rule (never mutate,
-always supersede) is what makes the memory trustworthy enough to act on
-without a human in the loop for low-impact decisions.
+Cada ficheiro de artigo começa com um cabeçalho de metadata (`type`,
+`version`, `date`, `supersedes`). Ver [`/VERSIONING.md`](../../VERSIONING.md)
+na raiz do repositório para a convenção completa: cada edição substancial
+sobe a versão, recebe uma tag git, e a nova versão liga explicitamente para
+a que substitui. Versões antigas continuam acessíveis pela sua tag.
+
+## A ideia central, num parágrafo
+
+A maioria das frameworks de agentes optimiza para *recuperação*. Esta
+arquitectura optimiza para *acumulação e validação*: factos e
+procedimentos entram como candidatos não validados, só são promovidos
+depois de cumprirem limiares explícitos (número de confirmações,
+confiança média, tamanho de amostra, taxa de sucesso) e, criticamente,
+candidatos nunca são apagados nem editados. Correcções criam novos
+registos; os antigos ficam para auditoria. Essa única regra de
+governação (nunca mutar, sempre superseder) é o que torna a memória
+suficientemente fiável para agir sem um humano no circuito, em decisões
+de baixo impacto.

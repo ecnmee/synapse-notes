@@ -3,12 +3,29 @@
 Tracks substantive edits to the article, not the original draft as written.
 Tag naming follows [`/VERSIONING.md`](../../VERSIONING.md).
 
+## v0.4, refactor: pt/en folder split, fixed-up links
+
+- supersedes: `articles/cortex-memory-architecture/v0.3`
+- Moved the Portuguese article from `article.pt-AO.md` to `pt/article.md`,
+  and the bibliography from `REFERENCES.md` to `pt/REFERENCES.md`
+  (translated to Portuguese).
+- Removed `article.en.md`. The English version is not published yet: the
+  underlying CortexOS code comments are still entirely in Portuguese, and
+  the article should not get ahead of the source it documents. An `en/`
+  folder exists as a placeholder with a `README.md` explaining why.
+- Fixed every internal link (diagrams, references, companion-language
+  link) to use paths relative to the actual repo structure, not to any
+  external tool or session the content was drafted in.
+- Repo's README updated to reflect the `pt/` / `en/` split and to keep
+  this article's own README in Portuguese until the English version
+  exists.
+
 ## v0.3, feat: bilingual version, bibliography, versioning metadata
 
 - supersedes: `articles/cortex-memory-architecture/v0.2`
 - Added `article.en.md`, an English version of the article kept in sync
   with `article.pt-AO.md`. Each file links to the other.
-- Added [`REFERENCES.md`](./REFERENCES.md): full bibliography for every
+- Added [`REFERENCES.md`](./pt/REFERENCES.md): full bibliography for every
   claim in the article (RAG paper, CoALA, ACT-R, SOAR, Generative Agents,
   MemGPT, MemoryBank), including an explicit note on which numbers
   (confirmation thresholds, success-rate cutoffs) are this system's own
