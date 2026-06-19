@@ -1,0 +1,59 @@
+<svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#888" />
+    </marker>
+  </defs>
+  <rect width="900" height="420" fill="#fafafa"/>
+  <text x="450" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#111">O Ciclo de Aprendizagem (Semantic e Procedural)</text>
+
+  <!-- 5 stage circles in a row -->
+  <g>
+    <circle cx="100" cy="180" r="55" fill="#1f2937"/>
+    <text x="100" y="175" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Execução</text>
+    <text x="100" y="193" text-anchor="middle" font-size="11" fill="#cbd5e1">do agente</text>
+  </g>
+
+  <line x1="155" y1="180" x2="225" y2="180" stroke="#888" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <g>
+    <circle cx="280" cy="180" r="55" fill="#f97316"/>
+    <text x="280" y="175" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Traços</text>
+    <text x="280" y="193" text-anchor="middle" font-size="11" fill="#ffedd5">/ episódios</text>
+  </g>
+
+  <line x1="335" y1="180" x2="405" y2="180" stroke="#888" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <g>
+    <circle cx="460" cy="180" r="55" fill="#ca8a04"/>
+    <text x="460" y="175" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Learner</text>
+    <text x="460" y="193" text-anchor="middle" font-size="11" fill="#fef9c3">extrai candidatos</text>
+  </g>
+
+  <line x1="515" y1="180" x2="585" y2="180" stroke="#888" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <g>
+    <circle cx="640" cy="180" r="55" fill="#16a34a"/>
+    <text x="640" y="170" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Validador</text>
+    <text x="640" y="188" text-anchor="middle" font-size="10" fill="#dcfce7">≥3 confirmações</text>
+    <text x="640" y="200" text-anchor="middle" font-size="10" fill="#dcfce7">conf. média ≥0.80</text>
+  </g>
+
+  <line x1="695" y1="180" x2="765" y2="180" stroke="#888" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <g>
+    <circle cx="820" cy="180" r="55" fill="#a21caf"/>
+    <text x="820" y="175" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Promovido</text>
+    <text x="820" y="193" text-anchor="middle" font-size="11" fill="#fae8ff">active</text>
+  </g>
+
+  <!-- feedback loop -->
+  <path d="M820,235 C820,330 100,330 100,235" stroke="#888" stroke-width="2" fill="none" stroke-dasharray="5,4" marker-end="url(#ah3)"/>
+  <text x="460" y="360" text-anchor="middle" font-size="13" fill="#555" font-style="italic">
+    próxima execução já consulta o conhecimento validado — sem chamar o LLM para o que já se sabe
+  </text>
+
+  <text x="450" y="400" text-anchor="middle" font-size="12" fill="#777">
+    Candidatos nunca são apagados nem editados — promoção cria um novo registo "active" (GOVERNANCE-5)
+  </text>
+</svg>

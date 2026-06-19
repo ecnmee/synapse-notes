@@ -1,0 +1,57 @@
+<svg viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <style>
+      .layer-box { rx: 12; stroke-width: 2; }
+      .label { font-size: 22px; font-weight: 700; fill: #1a1a1a; }
+      .sub { font-size: 14px; fill: #444; }
+      .tag { font-size: 12px; fill: #ffffff; font-weight: 600; }
+      .arrow { stroke: #888; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#888" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="560" fill="#fafafa"/>
+  <text x="450" y="40" text-anchor="middle" font-size="26" font-weight="700" fill="#111">CortexOS — 4 Camadas de Memória</text>
+
+  <!-- Working Memory -->
+  <rect class="layer-box" x="60" y="80" width="780" height="90" fill="#eef6ff" stroke="#3b82f6"/>
+  <rect x="60" y="80" width="160" height="90" fill="#3b82f6"/>
+  <text x="140" y="130" text-anchor="middle" class="tag">WORKING</text>
+  <text x="240" y="115" class="label">Contexto imediato da sessão</text>
+  <text x="240" y="140" class="sub">Cache · TTL 3600s · merge incremental por sessão</text>
+  <text x="240" y="158" class="sub">Entidades activas, último resultado de tool, notas de estado</text>
+
+  <line class="arrow" x1="450" y1="170" x2="450" y2="200"/>
+
+  <!-- Episodic Memory -->
+  <rect class="layer-box" x="60" y="200" width="780" height="90" fill="#fff7ed" stroke="#f97316"/>
+  <rect x="60" y="200" width="160" height="90" fill="#f97316"/>
+  <text x="140" y="250" text-anchor="middle" class="tag">EPISODIC</text>
+  <text x="240" y="235" class="label">Resumos de conversas passadas</text>
+  <text x="240" y="260" class="sub">Busca por similaridade (embeddings) · compressão assíncrona</text>
+  <text x="240" y="278" class="sub">status: pending_compression → compressed</text>
+
+  <line class="arrow" x1="450" y1="290" x2="450" y2="320"/>
+
+  <!-- Semantic Memory -->
+  <rect class="layer-box" x="60" y="320" width="780" height="100" fill="#f0fdf4" stroke="#16a34a"/>
+  <rect x="60" y="320" width="160" height="100" fill="#16a34a"/>
+  <text x="140" y="375" text-anchor="middle" class="tag">SEMANTIC</text>
+  <text x="240" y="350" class="label">Factos consolidados sobre o negócio</text>
+  <text x="240" y="372" class="sub">candidate → active (≥3 confirmações, confiança média ≥0.80)</text>
+  <text x="240" y="390" class="sub">nunca apaga: revogação = supersede (novo registo activo)</text>
+  <text x="240" y="408" class="sub">event sourcing: candidatos permanecem para auditoria (GOVERNANCE-5)</text>
+
+  <line class="arrow" x1="450" y1="420" x2="450" y2="450"/>
+
+  <!-- Procedural Memory -->
+  <rect class="layer-box" x="60" y="450" width="780" height="100" fill="#fdf4ff" stroke="#a21caf"/>
+  <rect x="60" y="450" width="160" height="100" fill="#a21caf"/>
+  <text x="140" y="505" text-anchor="middle" class="tag">PROCEDURAL</text>
+  <text x="240" y="480" class="label">Workflows executáveis aprendidos</text>
+  <text x="240" y="502" class="sub">candidate → scored → validated → active (auto, low impact)</text>
+  <text x="240" y="520" class="sub">success_rate ≥0.85 e sample_size ≥20 → activação automática</text>
+  <text x="240" y="538" class="sub">high impact → pending_approval (revisão humana)</text>
+</svg>
