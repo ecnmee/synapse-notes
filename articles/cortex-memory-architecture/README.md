@@ -8,12 +8,13 @@ num prompt.
 
 ## Conteúdo
 
-- [`pt/article.md`](./pt/article.md): o artigo publicado, em português (Angola).
+- [`pt/article.md`](./pt/article.md): o artigo publicado, em português (Angola). Publicado no Medium: https://medium.com/@ecnmee/as-4-camadas-de-mem%C3%B3ria-que-podem-mudar-a-forma-como-constru%C3%ADmos-agentes-de-ia-24ad18c26dd0
 - [`en/`](./en): versão em inglês, ainda pendente. Ver [`en/README.md`](./en/README.md) para o motivo.
 - [`diagrams/`](./diagrams): fontes SVG dos três diagramas referenciados no artigo:
   - `01-four-layers.svg`: as quatro camadas de memória e o seu modelo de persistência.
   - `02-memory-bus-facade.svg`: como o `MemoryBus` isola os consumidores do armazenamento concreto.
   - `03-learning-cycle.svg`: o ciclo de candidato, validação, promoção.
+- [`code/`](./code): excertos reais de schema (migrations) que sustentam cada afirmação técnica do artigo. Ver [`code/README.md`](./code/README.md) para o mapeamento ficheiro-a-afirmação e o porquê de outros ficheiros enviados não estarem aqui.
 - [`pt/REFERENCES.md`](./pt/REFERENCES.md): bibliografia completa, com notas sobre onde esta arquitectura segue trabalho anterior e onde diverge.
 - [`CHANGELOG.md`](./CHANGELOG.md): o que mudou entre versões, e porquê.
 

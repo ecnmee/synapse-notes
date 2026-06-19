@@ -3,6 +3,27 @@
 Tracks substantive edits to the article, not the original draft as written.
 Tag naming follows [`/VERSIONING.md`](../../VERSIONING.md).
 
+## v0.5, feat: link to published Medium article, source migrations
+
+- supersedes: `articles/cortex-memory-architecture/v0.4`
+- Added `medium_url` to the frontmatter, pointing to the article actually
+  published on Medium, so the repo and the live publication stay linked
+  explicitly instead of drifting apart silently.
+- Synced small wording edits made directly in the published draft: "há 3
+  meses atrás" (was vague "há um tempo"), explicit mention that prompt
+  stuffing was the technique used in the kernel's v1, and that the memory
+  architecture is the kernel's v2.
+- Added a closing line pointing readers to the code backing the article
+  (`code/`), matching the placeholder left in the published draft
+  ("Para avaliar o código, aceda:").
+- Added `code/migrations/`: the 6 real migrations that map directly to
+  claims in the article (episodes, tool_trace, episode_tool_traces,
+  semantic_memory, procedures, policy_observations), plus
+  `code/README.md` mapping each file to the specific claim it backs, and
+  listing which of the uploaded files were intentionally left out (FSM
+  core, reflection tier 2, strategic alignment, KB pipeline, and their
+  exceptions) because they belong to other subsystems, not this article.
+
 ## v0.4, refactor: pt/en folder split, fixed-up links
 
 - supersedes: `articles/cortex-memory-architecture/v0.3`

@@ -1,18 +1,21 @@
 ---
 type: feat
-version: v0.4
+version: v0.5
 date: 2026-06-19
-supersedes: articles/cortex-memory-architecture/v0.3
+supersedes: articles/cortex-memory-architecture/v0.4
 lang: pt-AO
 companion: pending (ver ../en/README.md)
 references: ./REFERENCES.md
+medium_url: https://medium.com/@ecnmee/as-4-camadas-de-mem%C3%B3ria-que-podem-mudar-a-forma-como-constru%C3%ADmos-agentes-de-ia-24ad18c26dd0
 ---
 
 # As 4 Camadas de Memória que Podem Mudar a Forma Como Construímos Agentes de IA
 
+*[Lê este artigo publicado no Medium](https://medium.com/@ecnmee/as-4-camadas-de-mem%C3%B3ria-que-podem-mudar-a-forma-como-constru%C3%ADmos-agentes-de-ia-24ad18c26dd0)*
+
 Salve, malta.
 
-Há um tempo fui contratado para desenvolver o **Simplifika AI**, um assistente de atendimento ao cliente com inteligência artificial. O objectivo, à superfície, é simples: responder dúvidas dos clientes com base no conhecimento da empresa. Mas quanto mais avançava no projecto, mais ficava claro que dava para ir muito além do básico.
+Há 3 meses atrás fui contratado para desenvolver o **Simplifika AI**, um assistente de atendimento ao cliente com inteligência artificial. O objectivo é simples: responder dúvidas dos clientes com base no conhecimento da empresa com que estão a interagir no chat. Mas quanto mais avançava no projecto, mais ficava claro que dava para ir muito além do básico.
 
 Foi assim que nasceu o **CortexOS**, o kernel cognitivo por trás do Simplifika. Um agente construído em PHP, com Finite State Machine (FSM), reflexão em camadas, roteamento inteligente e, sobretudo, uma arquitectura de memória pensada para evolução real, não só para "lembrar coisas".
 
@@ -22,7 +25,7 @@ Não quero vender o projecto aqui. Quero partilhar uma ideia que considero impor
 
 Hoje, a maioria dos agentes segue mais ou menos o mesmo modelo:
 
-- Enche o prompt com o máximo de contexto possível (*prompt stuffing*);
+- Enche o prompt com o máximo de contexto possível (*prompt stuffing*), a técnica que usei na versão 1 do kernel do Simplifika AI;
 - Usa uma **vector store + RAG** (Retrieval-Augmented Generation) para ir buscar documentos relevantes.
 
 Este padrão popularizou-se porque é relativamente fácil de implementar e funciona bem no início. Vês isto em LangChain, LlamaIndex, CrewAI, AutoGen e em quase todos os tutoriais de agentes que existem por aí.
@@ -34,7 +37,7 @@ Este padrão popularizou-se porque é relativamente fácil de implementar e func
 - Há dificuldade em acumular conhecimento ao longo do tempo.
 - Erros repetem-se, porque não existe validação estruturada do que foi "aprendido".
 
-Para o Simplifika, eu queria algo diferente.
+Para o Simplifika, eu queria algo diferente, uma versão 2 do kernel, mas com capacidade de ir além.
 
 ## A proposta: 4 camadas de memória, cada uma com um papel definido
 
@@ -116,6 +119,8 @@ Este artigo apoia-se em trabalho publicado, não inventa os conceitos do zero:
 - Zhong, W. et al. (2023). *MemoryBank: Enhancing Large Language Models with Long-Term Memory*. arXiv:2305.10250. https://arxiv.org/abs/2305.10250
 
 Lista completa, com notas sobre onde o CortexOS segue a literatura e onde diverge, em [`REFERENCES.md`](./REFERENCES.md).
+
+Para avaliar o código (excertos reais, anonimizados) por trás de cada afirmação técnica deste artigo, aceda a [`synapse-notes/articles/cortex-memory-architecture`](https://github.com/ecnmee/synapse-notes/tree/main/articles/cortex-memory-architecture).
 
 ---
 
