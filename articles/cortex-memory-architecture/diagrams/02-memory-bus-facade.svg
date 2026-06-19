@@ -5,7 +5,7 @@
     </marker>
   </defs>
   <rect width="900" height="480" fill="#fafafa"/>
-  <text x="450" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#111">MemoryBus — Fachada Única de Acesso</text>
+  <text x="450" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#111">MemoryBus  -  Fachada Única de Acesso</text>
 
   <!-- Consumers -->
   <rect x="340" y="60" width="220" height="50" rx="8" fill="#1f2937"/>
@@ -47,6 +47,6 @@
   <text x="450" y="430" text-anchor="middle" font-size="11" fill="#555">telemetria, sem pipeline candidate/active</text>
 
   <text x="450" y="470" text-anchor="middle" font-size="12" fill="#777" font-style="italic">
-    Nenhum consumidor acede a uma camada directamente — tudo passa pelo bus.
+    Nenhum consumidor acede a uma camada directamente  -  tudo passa pelo bus.
   </text>
 </svg>

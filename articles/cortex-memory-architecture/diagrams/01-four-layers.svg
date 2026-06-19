@@ -13,7 +13,7 @@
   </defs>
 
   <rect x="0" y="0" width="900" height="560" fill="#fafafa"/>
-  <text x="450" y="40" text-anchor="middle" font-size="26" font-weight="700" fill="#111">CortexOS — 4 Camadas de Memória</text>
+  <text x="450" y="40" text-anchor="middle" font-size="26" font-weight="700" fill="#111">CortexOS  -  4 Camadas de Memória</text>
 
   <!-- Working Memory -->
   <rect class="layer-box" x="60" y="80" width="780" height="90" fill="#eef6ff" stroke="#3b82f6"/>

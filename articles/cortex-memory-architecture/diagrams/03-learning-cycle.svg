@@ -50,10 +50,10 @@
   <!-- feedback loop -->
   <path d="M820,235 C820,330 100,330 100,235" stroke="#888" stroke-width="2" fill="none" stroke-dasharray="5,4" marker-end="url(#ah3)"/>
   <text x="460" y="360" text-anchor="middle" font-size="13" fill="#555" font-style="italic">
-    próxima execução já consulta o conhecimento validado — sem chamar o LLM para o que já se sabe
+    próxima execução já consulta o conhecimento validado  -  sem chamar o LLM para o que já se sabe
   </text>
 
   <text x="450" y="400" text-anchor="middle" font-size="12" fill="#777">
-    Candidatos nunca são apagados nem editados — promoção cria um novo registo "active" (GOVERNANCE-5)
+    Candidatos nunca são apagados nem editados  -  promoção cria um novo registo "active" (GOVERNANCE-5)
   </text>
 </svg>
