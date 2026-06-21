@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\Log;
  * }
  *
  * Pipeline de activação (Invariante — nunca activa directamente):
- *   candidate → scored → validated → active (low impact, automático)
- *                                  → pending_approval (high impact, manual)
+ *   candidate → scored → active (low impact, automático via ProceduralPromotionJob)
+ *                              → pending_approval (high impact, manual)
  *
  * Usado pelo {@see \App\Services\V2\Agent\Routing\ProceduralRouter} (Layer 2)
  * para selecção de tools sem custo de tokens.
@@ -109,7 +109,7 @@ final class ProceduralMemory implements ProceduralMemoryInterface
                 ->where('tenant_id', $tenantId)
                 ->where('trigger', $trigger)
                 ->where('version', 'v2')
-                ->whereIn('status', ['candidate', 'scored', 'validated', 'active'])
+                ->whereIn('status', ['candidate', 'scored', 'active'])
                 ->first();
 
             if ($existing) {
@@ -157,7 +157,7 @@ final class ProceduralMemory implements ProceduralMemoryInterface
                 ->where('tenant_id', $tenantId)
                 ->where('trigger', $trigger)
                 ->where('version', 'v2')
-                ->whereIn('status', ['candidate', 'scored', 'validated', 'active'])
+                ->whereIn('status', ['candidate', 'scored', 'active'])
                 ->first();
 
             if (! $procedure) {
@@ -171,29 +171,103 @@ final class ProceduralMemory implements ProceduralMemoryInterface
                 4
             );
 
+            // Transição candidate → scored quando threshold é atingido.
+            // A promoção scored → active | pending_approval pertence ao
+            // ProceduralPromotionJob — não acontece inline aqui.
             $newStatus = $procedure->status;
 
-            if ($procedure->status !== 'active' && $sampleSize >= self::MIN_SAMPLE_SIZE) {
-                if ($successRate >= self::AUTO_ACTIVATE_THRESHOLD) {
-                    $newStatus = $procedure->impact_level === 'low'
-                        ? 'active'
-                        : 'pending_approval';
-                } else {
-                    $newStatus = 'scored';
-                }
+            if ($procedure->status === 'candidate'
+                && $sampleSize >= self::MIN_SAMPLE_SIZE
+                && $successRate >= self::AUTO_ACTIVATE_THRESHOLD
+            ) {
+                $newStatus = 'scored';
+            }
+
+            $fields = [
+                'success_rate' => $successRate,
+                'sample_size'  => $sampleSize,
+                'status'       => $newStatus,
+            ];
+
+            // updated_at só avança em transições de estado — preserva a data
+            // de activação para que o grace period do HealthMonitor seja correcto.
+            if ($newStatus !== $procedure->status) {
+                $fields['updated_at'] = now();
             }
 
             DB::table('agent_procedures')
                 ->where('id', $procedure->id)
-                ->update([
-                    'success_rate' => $successRate,
-                    'sample_size'  => $sampleSize,
-                    'status'       => $newStatus,
-                    'updated_at'   => now(),
-                ]);
+                ->update($fields);
 
         } catch (\Exception $e) {
             Log::warning('[ProceduralMemory] recordOutcome falhou', [
+                'error'      => $e->getMessage(),
+                'tenant_id'  => $tenantId,
+                'trigger'    => $trigger,
+            ]);
+        }
+    }
+
+    /**
+     * Insere um procedimento com métricas históricas derivadas do PatternDetector.
+     *
+     * Difere de propose() em dois aspectos:
+     *   1. Entra com status 'scored' — evidência histórica já validada.
+     *   2. Preserva success_rate e sample_size reais — não começa em zero.
+     *
+     * A promoção scored → active pertence ao ProceduralPromotionJob,
+     * que corre periodicamente e não depende de tráfego futuro.
+     *
+     * Idempotente por (tenant_id, trigger, version) — se já existe um
+     * procedimento activo ou em scored para o trigger, não substitui.
+     *
+     * @param  int           $tenantId
+     * @param  string        $trigger
+     * @param  list<string>  $workflow
+     * @param  float         $successRate  Taxa histórica calculada pelo PatternDetector.
+     * @param  int           $sampleSize   Número de execuções históricas observadas.
+     * @param  string        $impactLevel  'low'|'high'
+     */
+    public function bootstrapCandidate(
+        int    $tenantId,
+        string $trigger,
+        array  $workflow,
+        float  $successRate,
+        int    $sampleSize,
+        string $impactLevel = 'low',
+    ): void {
+        try {
+            $existing = DB::table('agent_procedures')
+                ->where('tenant_id', $tenantId)
+                ->where('trigger', $trigger)
+                ->where('version', 'v2')
+                ->whereIn('status', ['candidate', 'scored', 'active'])
+                ->first();
+
+            if ($existing) {
+                return;
+            }
+
+            // success_rate e sample_size são inicializados a zero.
+            // Os parâmetros $successRate e $sampleSize representam evidência
+            // histórica de descoberta — qualificam a existência do padrão mas
+            // não devem pré-carregar métricas de runtime. O recordOutcome()
+            // acumula sobre zero, garantindo que o HealthMonitor avalia
+            // exclusivamente execuções reais como procedimento activo.
+            DB::table('agent_procedures')->insert([
+                'tenant_id'    => $tenantId,
+                'trigger'      => $trigger,
+                'workflow'     => json_encode($workflow),
+                'success_rate' => 0.0,
+                'sample_size'  => 0,
+                'impact_level' => $impactLevel,
+                'status'       => 'scored',
+                'version'      => 'v2',
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('[ProceduralMemory] bootstrapCandidate falhou', [
                 'error'      => $e->getMessage(),
                 'tenant_id'  => $tenantId,
                 'trigger'    => $trigger,

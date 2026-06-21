@@ -7,24 +7,21 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Tabela de telemetria de execução por episódio.
+ * Cria a tabela `agent_episode_tool_traces`.
  *
- * Separada de agent_episodes por responsabilidade:
- *   agent_episodes         → memória episódica (o que aconteceu, cognitivamente)
+ * Telemetria operacional de execução por episódio.
+ * Separada de `agent_episodes` por responsabilidade:
+ *   agent_episodes            → memória episódica (o que aconteceu, cognitivamente)
  *   agent_episode_tool_traces → telemetria operacional (como aconteceu, tecnicamente)
  *
  * ─── Uso pelo PatternDetector ────────────────────────────────────────────────
  *
- * A query central do PatternDetector é:
- *
+ * Query central:
  *   SELECT trigger, workflow_hash, COUNT(*) AS executions, AVG(success) AS success_rate
  *   FROM agent_episode_tool_traces
  *   WHERE tenant_id = ? AND trigger IS NOT NULL
  *   GROUP BY trigger, workflow_hash
  *   HAVING COUNT(*) >= 20 AND AVG(success) >= 0.85
- *
- * workflow_hash permite agrupar execuções com a mesma sequência ordenada de
- * tools — sem ele seria necessário reconstruir e comparar arrays JSON por linha.
  *
  * ─── workflow_hash ────────────────────────────────────────────────────────────
  *
@@ -32,17 +29,11 @@ use Illuminate\Support\Facades\Schema;
  * Calculado pelo EpisodeToolTraceRepository antes da inserção.
  * Permite GROUP BY workflow completo sem deserializar arrays.
  *
- * ─── trigger ─────────────────────────────────────────────────────────────────
- *
- * Intent do goal resolvido neste episódio — derivado de goal->metadata['intent'].
- * Nullable: episódios sem goal resolvido não têm trigger significativo para
- * aprendizagem procedimental.
- *
  * ─── Índices ─────────────────────────────────────────────────────────────────
  *
- * (tenant_id, trigger, workflow_hash) — query principal do PatternDetector
- * (episode_id)                        — lookup por episódio (FK implícita)
- * (tenant_id, created_at)             — janela temporal de análise
+ * (tenant_id, trigger, workflow_hash) → query principal do PatternDetector
+ * (episode_id)                        → lookup por episódio
+ * (tenant_id, created_at)             → janela temporal de análise
  *
  * @package Database\Migrations\V2\Agent
  * @author  Eduardo Costa Nkuansambu

@@ -24,5 +24,9 @@ interface EpisodeRepositoryInterface
     /** @return list<Episode> */
     public function forRevision(int $tenantId, string $revision, int $limit = 100): array;
 
-    public function find(string $episodeId): ?Episode;
+    /**
+     * Devolve null tanto para "não existe" como para "existe mas é de outro tenant".
+     * O caller não deve distinguir os dois casos — ambos tratam-se como ausente.
+     */
+    public function find(int $tenantId, string $episodeId): ?Episode;
 }

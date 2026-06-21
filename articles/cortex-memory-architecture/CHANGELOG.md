@@ -3,6 +3,48 @@
 Tracks substantive edits to the article, not the original draft as written.
 Tag naming follows [`/VERSIONING.md`](../../VERSIONING.md).
 
+## v0.7, feat: sync code with P5.1 (conflict resolution, procedural health monitor)
+
+- supersedes: `articles/cortex-memory-architecture/v0.6`
+- Updated `pt/code/Memory/` to the current CortexOS implementation
+  (P5.1). The published article text (Medium) was **not** rewritten
+  retroactively; instead, a short "Nota de evolução" was added near the
+  end of `pt/article.md`, pointing to what changed in the code since
+  publication.
+- Added `SemanticConflictResolver.php` and `ConflictResolution.php`:
+  before promoting a semantic candidate, the validator now checks for an
+  existing active fact on the same entity with a different claim. Higher
+  confidence wins and supersedes the old fact (via `SemanticMemory::supersede()`);
+  lower confidence is rejected. Previously, `SemanticValidator` only
+  checked "already active", with no handling for conflicting claims.
+- Added `ProceduralHealthMonitor.php`: deactivates `active` procedures
+  whose `success_rate` falls below 0.60, gated by a minimum sample size
+  (30) and a 7-day grace period after activation. This closes a gap the
+  article explicitly flagged as unimplemented in `REFERENCES.md`
+  (compared to MemoryBank's forgetting-curve approach); updated that
+  note to describe the actual threshold-based mechanism instead.
+- Simplified the procedural pipeline: removed the `validated` status.
+  No component ever implemented the `scored -> validated` transition; it
+  was, in the new migration's own words, "a ghost state". Pipeline is
+  now `candidate -> scored -> active | pending_approval`.
+- Added `ProceduralMemory::bootstrapCandidate()`: seeds a procedure
+  directly into `scored` status with historical metrics from the
+  PatternDetector, instead of starting every procedure at zero.
+- Added `Episodic/EpisodeToolTraceRepository.php` and clarified that
+  `EpisodeRepository` now persists to a new `agent_domain_episodes`
+  table (immutable domain episodes), explicitly separate from the
+  legacy `agent_episodes` table used by `EpisodicMemory` for the
+  Python-compression pipeline. `EpisodeRepositoryInterface::find()` now
+  requires an explicit `tenant_id`.
+- `migrations/`: replaced the 6 previously included files with their
+  current versions (renumbered, with the `tool_trace`/`alignment_traces`
+  columns folded directly into the `agent_episodes` creation migration
+  instead of a separate `add_tool_trace` migration, which no longer
+  exists); added `2026_06_20_000001_create_agent_domain_episodes_table.php`;
+  added the `idx_semantic_tenant_entity_status` index required by the
+  conflict resolver.
+- Updated `pt/code/README.md` with the new file-to-claim mapping.
+
 ## v0.6, refactor: move code/ and diagrams/ inside pt/, add real Memory/ source
 
 - supersedes: `articles/cortex-memory-architecture/v0.5`

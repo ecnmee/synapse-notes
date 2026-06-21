@@ -1,8 +1,8 @@
 ---
 type: feat
-version: v0.6
-date: 2026-06-19
-supersedes: articles/cortex-memory-architecture/v0.5
+version: v0.7
+date: 2026-06-21
+supersedes: articles/cortex-memory-architecture/v0.6
 lang: pt-AO
 companion: pending (ver ../en/README.md)
 references: ./REFERENCES.md
@@ -121,6 +121,8 @@ Este artigo apoia-se em trabalho publicado, não inventa os conceitos do zero:
 Lista completa, com notas sobre onde o CortexOS segue a literatura e onde diverge, em [`REFERENCES.md`](./REFERENCES.md).
 
 Para avaliar o código (excertos reais, anonimizados) por trás de cada afirmação técnica deste artigo, aceda a [`synapse-notes/articles/cortex-memory-architecture/pt/code`](https://github.com/ecnmee/synapse-notes/tree/main/articles/cortex-memory-architecture/pt/code).
+
+> **Nota de evolução (pós-publicação, P5.1):** o texto acima descreve o sistema como estava no momento da publicação no Medium. O código em `pt/code/` reflecte o estado actual, que já evoluiu: a memória semântica resolve agora conflitos entre factos activos para a mesma entidade (o candidato com maior confiança substitui o anterior via `supersede()`, em vez de bloquear), o pipeline procedural perdeu um estado fantasma (`validated`, que nunca teve componente a operá-lo) e ganhou um `ProceduralHealthMonitor` que desactiva procedimentos degradados, e os episódios de domínio passaram a viver numa tabela própria (`agent_domain_episodes`), separada do pipeline legacy de compressão. Detalhe completo em [`code/README.md`](./code/README.md) e em [`CHANGELOG.md`](../CHANGELOG.md). O texto do artigo publicado não foi alterado retroactivamente, esta nota é o que liga a publicação ao estado real do código.
 
 ---
 

@@ -20,86 +20,44 @@ use Illuminate\Support\Facades\Log;
  * Um facto é promovido quando, para o mesmo (tenant_id, entity, claim):
  *
  *   1. Existe pelo menos {@see MIN_CONFIRMATIONS} candidatos distintos.
- *      Confirmações são contadas por registos candidate independentes — cada
- *      chamada a SemanticMemory::propose() para a mesma (entity, claim) conta
- *      como uma confirmação adicional, mesmo sem campo sample_size na tabela.
- *
  *   2. A confiança média dos candidatos é >= {@see MIN_CONFIDENCE}.
+ *
+ * ─── Resolução de conflitos (P5.1) ────────────────────────────────────────────
+ *
+ * Antes de promover, o {@see SemanticConflictResolver} verifica se existe
+ * um facto 'active' para a mesma entity com claim diferente:
+ *
+ *   - Sem conflito       → promoção normal
+ *   - Já activo          → ignorar (idempotência)
+ *   - Conflito resolvido → supersede() já criou o novo facto active
+ *   - Rejeitado          → candidato com confiança inferior, ignorar
  *
  * ─── Invariante GOVERNANCE-5 ────────────────────────────────────────────────
  *
- * Candidatos nunca são apagados nem marcados como 'active'.
- * A promoção cria um novo registo com status 'active' — os candidatos
- * permanecem como 'candidate' para auditoria histórica.
- *
- * Isto é diferente do pipeline procedimental, que actualiza o mesmo registo.
- * A razão: semântica segue event sourcing — cada candidato é um evento
- * observado independentemente. O registo 'active' é uma projecção derivada.
- *
- * ─── Idempotência ────────────────────────────────────────────────────────────
- *
- * validate() é seguro para chamar múltiplas vezes para o mesmo tenant.
- * A query verifica se já existe um registo 'active' para (entity, claim) —
- * se existir, não cria duplicado.
- *
- * ─── Quando chamar ───────────────────────────────────────────────────────────
- *
- * Tipicamente chamado por um job assíncrono (ex: SemanticValidationJob)
- * agendado periodicamente — não no caminho crítico de execução.
- * Pode também ser chamado directamente em testes ou via Artisan command.
- *
- * ─── Relação com SemanticMemory::supersede() ────────────────────────────────
- *
- * supersede() existe para correcção manual de factos activos — operador
- * ou sistema externo que detecta erro num facto já promovido.
- * validate() é o pipeline automático de promoção de candidatos.
- * Os dois operam em momentos diferentes e não interferem.
+ * Candidatos nunca são apagados nem alterados.
+ * A promoção cria um novo registo 'active' — os candidatos permanecem
+ * como 'candidate' para auditoria histórica.
  *
  * @package App\Services\V2\Agent\Memory
  * @author  Eduardo Costa Nkuansambu
  */
 final class SemanticValidator
 {
-    /**
-     * Número mínimo de candidatos independentes para o mesmo (entity, claim)
-     * antes de promover para 'active'.
-     *
-     * Valor 2: exige que o facto apareça em pelo menos 2 episódios distintos
-     * antes de ser considerado conhecimento estável. Evita que uma única
-     * afirmação isolada contamine a memória activa.
-     *
-     * Revisar para valor superior (ex: 3) quando o volume de execuções
-     * por tenant aumentar — hoje o valor baixo é adequado ao sample size
-     * esperado em produção inicial.
-     * por isso 0.80 é o mínimo para que a média do grupo seja considerada
-     * conhecimento estável — não apenas plausível.
-     */
     private const MIN_CONFIRMATIONS = 3;
+    private const MIN_CONFIDENCE    = 0.80;
 
-    /**
-     * Confiança média mínima dos candidatos para promoção.
-     *
-     * Alinhado com SemanticConsolidator::MIN_CONFIDENCE (0.60) mas
-     * deliberadamente acima do SemanticConsolidator::MIN_CONFIDENCE (0.60):
-     * candidatos que chegam aqui já passaram o filtro de consolidação,
-     * por isso 0.80 é o mínimo para que a média do grupo seja considerada
-     * conhecimento estável — não apenas plausível.
-     */
-    private const MIN_CONFIDENCE = 0.80;
+    public function __construct(
+        private readonly SemanticConflictResolver $conflictResolver,
+    ) {}
 
     /**
      * Valida e promove candidatos semânticos de um tenant.
      *
-     * Percorre todos os grupos (entity, claim) com candidatos suficientes
-     * e cria registos 'active' para os que passam os dois critérios.
-     *
-     * Falhas individuais de promoção são registadas e não interrompem
-     * o processamento dos restantes candidatos.
+     * Para cada grupo (entity, claim) elegível, consulta o ConflictResolver
+     * antes de promover. O resultado determina o próximo passo.
      *
      * @param  int $tenantId
-     * @return int Número de factos promovidos nesta chamada.
-     * por isso 0.80 é o mínimo para que a média do grupo seja considerada
-     * conhecimento estável — não apenas plausível.
+     * @return int Número de factos promovidos ou resolvidos nesta chamada.
      */
     public function validate(int $tenantId): int
     {
@@ -116,23 +74,38 @@ final class SemanticValidator
         }
 
         foreach ($candidates as $candidate) {
-            if ($this->alreadyActive($tenantId, $candidate->entity, $candidate->claim)) {
-                continue;
-            }
-
             try {
+                $resolution = $this->conflictResolver->resolve(
+                    tenantId:   $tenantId,
+                    entity:     $candidate->entity,
+                    claim:      $candidate->claim,
+                    confidence: (float) $candidate->avg_confidence,
+                    source:     $candidate->canonical_source,
+                );
+
+                if ($resolution->shouldSkip()) {
+                    // already_active, superseded ou rejected —
+                    // superseded conta como promovido (conflito resolvido)
+                    if ($resolution->status === 'superseded') {
+                        $promoted++;
+                    }
+                    continue;
+                }
+
+                // no_conflict — promoção normal
                 $this->promote($tenantId, $candidate);
                 $promoted++;
 
                 Log::info('[SemanticValidator] Facto promovido para active.', [
-                    'tenant_id'    => $tenantId,
-                    'entity'       => $candidate->entity,
-                    'claim'        => mb_substr($candidate->claim, 0, 80),
-                    'confirmations' => $candidate->confirmations,
+                    'tenant_id'      => $tenantId,
+                    'entity'         => $candidate->entity,
+                    'claim'          => mb_substr($candidate->claim, 0, 80),
+                    'confirmations'  => $candidate->confirmations,
                     'avg_confidence' => $candidate->avg_confidence,
                 ]);
+
             } catch (\Exception $e) {
-                Log::warning('[SemanticValidator] Falha ao promover facto.', [
+                Log::warning('[SemanticValidator] Falha ao processar candidato.', [
                     'error'     => $e->getMessage(),
                     'tenant_id' => $tenantId,
                     'entity'    => $candidate->entity,
@@ -146,15 +119,7 @@ final class SemanticValidator
     /**
      * Agrupa candidatos por (entity, claim) e filtra pelos critérios mínimos.
      *
-     * A query devolve apenas grupos que:
-     *   - têm >= MIN_CONFIRMATIONS candidatos
-     *   - têm confiança média >= MIN_CONFIDENCE
-     *
-     * O source mais frequente é usado como source canónico do registo active.
-     *
      * @return array<object{entity: string, claim: string, confirmations: int, avg_confidence: float, canonical_source: string}>
-     * por isso 0.80 é o mínimo para que a média do grupo seja considerada
-     * conhecimento estável — não apenas plausível.
      */
     private function fetchEligibleGroups(int $tenantId): array
     {
@@ -177,31 +142,9 @@ final class SemanticValidator
     }
 
     /**
-     * Verifica se já existe um registo 'active' para (entity, claim).
-     *
-     * Garante idempotência — nunca cria duplicados de factos activos.
-     * por isso 0.80 é o mínimo para que a média do grupo seja considerada
-     * conhecimento estável — não apenas plausível.
-     */
-    private function alreadyActive(int $tenantId, string $entity, string $claim): bool
-    {
-        return DB::table('agent_semantic_memory')
-            ->where('tenant_id', $tenantId)
-            ->where('entity', $entity)
-            ->where('claim', $claim)
-            ->where('status', 'active')
-            ->where('version', 'v2')
-            ->exists();
-    }
-
-    /**
      * Cria o registo 'active' a partir do grupo de candidatos agregado.
      *
      * Não altera os candidatos existentes (GOVERNANCE-5).
-     * A confiança do registo activo é a média dos candidatos.
-     * O source é o mais frequente entre os candidatos do grupo.
-     * por isso 0.80 é o mínimo para que a média do grupo seja considerada
-     * conhecimento estável — não apenas plausível.
      */
     private function promote(int $tenantId, object $candidate): void
     {

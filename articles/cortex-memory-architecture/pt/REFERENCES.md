@@ -55,10 +55,13 @@ anterior, isso é assinalado; onde diverge, também.
   with Long-Term Memory*. arXiv:2305.10250.
   https://arxiv.org/abs/2305.10250
   - Mecanismo de actualização de memória inspirado na curva de
-    esquecimento; citado como abordagem alternativa à degradação de
-    memória que o CortexOS ainda não implementa (o CortexOS desactiva
-    procedimentos explicitamente, em vez de os degradar
-    automaticamente).
+    esquecimento; ponto de comparação para a degradação de memória
+    procedural. Desde P5.1, o CortexOS tem um `ProceduralHealthMonitor`
+    que desactiva procedimentos cujo `success_rate` cai abaixo de um
+    limiar absoluto (0.60), com período de graça e amostra mínima, em
+    vez de degradar a confiança gradualmente como no MemoryBank. É um
+    mecanismo de desactivação por threshold, não uma curva de
+    esquecimento.
 
 ## Onde o CortexOS diverge da literatura
 

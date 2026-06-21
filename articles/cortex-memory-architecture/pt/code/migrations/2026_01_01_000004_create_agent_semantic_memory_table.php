@@ -7,8 +7,16 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Invariante GOVERNANCE-5: registos nunca são apagados.
- * Revogação marca status = 'superseded' e cria novo registo.
+ * Cria a tabela `agent_semantic_memory`.
+ *
+ * Memória semântica imutável por tenant. Invariante GOVERNANCE-5: registos
+ * nunca são apagados — revogação marca status = 'superseded' e cria novo registo.
+ *
+ * ─── Índices ──────────────────────────────────────────────────────────────────
+ *
+ * idx_semantic_tenant_entity_status → necessário para o SemanticConflictResolver:
+ *   WHERE tenant_id = ? AND entity = ? AND status = 'active'
+ *   Sem este índice a query faz full scan com volume de factos por tenant.
  *
  * @package Database\Migrations\V2\Agent
  * @author  Eduardo Costa Nkuansambu
@@ -32,6 +40,9 @@ return new class extends Migration
             $table->timestamp('validated_at')->nullable();
             $table->string('version', 8)->default('v2')->index();
             $table->timestamps();
+
+            // Índice composto para o SemanticConflictResolver
+            $table->index(['tenant_id', 'entity', 'status'], 'idx_semantic_tenant_entity_status');
         });
     }
 

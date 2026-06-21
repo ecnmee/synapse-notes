@@ -1,8 +1,10 @@
-# code/ - excertos de schema e implementação que sustentam este artigo
+# code/, excertos de schema e implementação que sustentam este artigo
 
 Implementação real (anonimizada onde necessário) das 4 camadas de memória
-e as migrations correspondentes. Cada ficheiro é referenciado explicitamente
-no texto ou nos diagramas de `pt/article.md`.
+e as migrations correspondentes. Reflecte o estado actual do CortexOS
+(P5.1), que evoluiu depois da publicação inicial do artigo (v0.6). Ver
+`CHANGELOG.md` e a nota de evolução em `pt/article.md` para o que mudou
+desde a publicação.
 
 ## Memory/
 
@@ -12,40 +14,31 @@ Implementação concreta das 4 camadas e da fachada que as une:
 |---|---|
 | `MemoryBus.php`, `MemoryBusInterface.php` | A fachada única citada na secção "Tudo passa por um único ponto". |
 | `WorkingMemory.php`, `WorkingMemoryInterface.php` | Working Memory: cache com TTL, merge incremental. |
-| `EpisodicMemory.php`, `EpisodicMemoryInterface.php` | Episodic Memory: busca por similaridade, persistência assíncrona. |
+| `EpisodicMemory.php`, `EpisodicMemoryInterface.php` | Pipeline legacy de compressão assíncrona (`agent_episodes`): resumo + embedding via serviço Python. |
 | `SemanticMemory.php`, `SemanticValidator.php` | Semantic Memory: pipeline `propose()` → `validate()`, os limiares de 3 confirmações e confiança 0.80 citados no artigo. |
-| `ProceduralMemory.php`, `ProceduralMemoryInterface.php` | Procedural Memory: `propose()`, `recordOutcome()`, activação automática em `sample_size >= 20` e `success_rate >= 0.85`. |
-| `Episodic/Episode.php`, `EpisodeOutcome.php`, `EpisodeRepository.php`, `EpisodeRepositoryInterface.php` | Modelo de domínio do episódio e a sua persistência. |
+| `SemanticConflictResolver.php`, `ConflictResolution.php` | **Novo (P5.1).** Resolve conflitos entre factos activos para a mesma entity: candidato com confiança maior substitui via `supersede()`; candidato com confiança menor é rejeitado. Chamado pelo `SemanticValidator` antes de promover. |
+| `ProceduralMemory.php`, `ProceduralMemoryInterface.php` | Procedural Memory: `propose()`, `recordOutcome()`. Pipeline simplificado: `candidate → scored → active|pending_approval` (o estado `validated` foi removido, era um estado fantasma sem componente a operá-lo). `bootstrapCandidate()` semeia procedimentos com métricas históricas vindas do PatternDetector. |
+| `ProceduralHealthMonitor.php` | **Novo.** Desactiva procedimentos `active` que degradaram: `success_rate < 0.60`, com amostra mínima de 30 execuções e um período de graça de 7 dias após activação. Fecha o ciclo de vida que o artigo, na versão publicada, descrevia como "ainda não implementado" (ver `REFERENCES.md`). |
+| `Episodic/Episode.php`, `EpisodeOutcome.php` | Modelo de domínio do episódio (VO imutável). |
+| `Episodic/EpisodeRepository.php`, `EpisodeRepositoryInterface.php` | Persiste em `agent_domain_episodes` (episódios de domínio imutáveis), distinta da tabela legacy `agent_episodes` usada por `EpisodicMemory`. `find()` agora exige `tenant_id` explícito. |
+| `Episodic/EpisodeToolTraceRepository.php` | **Novo.** Persiste a telemetria de tool calls em `agent_episode_tool_traces`, separada do episódio por volume; é a fonte da query do PatternDetector citada no artigo. |
 | `Policy/PolicyObservationRepository.php` | Telemetria de política, mencionada como "sem pipeline candidate/active" na secção do `MemoryBus`. |
 
 ## migrations/
 
 | Ficheiro | O que prova no artigo |
 |---|---|
-| `2026_01_01_000003_create_agent_episodes_table.php` | Schema da camada Episodic: `status` default `pending_compression`, `summary`/`embedding` preenchidos de forma assíncrona. |
-| `2026_04_01_000001_add_tool_trace_to_agent_episodes_table.php` | Coluna `tool_trace` adicionada como nullable, compatível com episódios anteriores, suporta a afirmação de que episódios antigos não são invalidados. |
-| `2026_04_01_000002_create_agent_episode_tool_traces_table.php` | Telemetria por tool execution; a query do `PatternDetector` documentada aqui (`HAVING COUNT(*) >= 20 AND AVG(success) >= 0.85`) é exactamente o limiar citado na secção de Procedural Memory. |
-| `2026_01_01_000004_create_agent_semantic_memory_table.php` | Schema da camada Semantic: `status` (`candidate`/`active`/`superseded`) e `supersedes_fact_id`, que sustentam a invariante GOVERNANCE-5 ("nunca apagar, só substituir"). |
-| `2026_01_01_000005_create_agent_procedures_table.php` | Schema da camada Procedural: `success_rate`, `sample_size`, `impact_level`, pipeline `candidate → scored → validated → active/pending_approval`. |
-| `2026_06_18_115441_create_agent_policy_observations_table.php` | Schema da telemetria de política mencionada na secção do `MemoryBus`: tabela append-only, sem pipeline candidate/active, alinhada com a explicação de que observações de política não são "conhecimento validável". |
+| `2026_01_01_000003_create_agent_episodes_table.php` | Schema da camada Episodic legacy: `status` default `pending_compression`, `tool_trace` e `alignment_traces` já incluídos na criação da tabela (a migration `add_tool_trace` separada foi descontinuada e absorvida aqui). |
+| `2026_01_01_000004_create_agent_semantic_memory_table.php` | Schema da camada Semantic, agora com o índice `idx_semantic_tenant_entity_status`, necessário para a query do `SemanticConflictResolver`. |
+| `2026_01_01_000006_create_agent_procedures_table.php` | Schema da camada Procedural: pipeline `candidate → scored → active|pending_approval`, sem o estado `validated`. |
+| `2026_01_01_000007_create_agent_episode_tool_traces_table.php` | Telemetria por tool execution; a query do `PatternDetector` (`HAVING COUNT(*) >= 20 AND AVG(success) >= 0.85`) é exactamente o limiar citado na secção de Procedural Memory. |
+| `2026_06_18_000001_create_agent_policy_observations_table.php` | Schema da telemetria de política mencionada na secção do `MemoryBus`. |
+| `2026_06_20_000001_create_agent_domain_episodes_table.php` | **Novo.** Schema dos episódios de domínio imutáveis (`EpisodeRepository`), incluindo o campo `compacted_at` para o futuro `EpisodeCompactionJob` (P5.3, ainda não documentado neste artigo). |
 
 ## O que ficou de fora, e porquê
 
-Estes ficheiros foram enviados mas não pertencem a este artigo, são de
-outros subsistemas do CortexOS e vão para as pastas de artigos futuros
-correspondentes:
-
-| Ficheiro | Subsistema | Artigo provável |
-|---|---|---|
-| `2026_01_01_000001_create_agent_executions_table.php` | Núcleo da FSM | `cortex-fsm-kernel` |
-| `2026_01_01_000002_create_agent_execution_transitions_table.php` | Núcleo da FSM | `cortex-fsm-kernel` |
-| `2026_06_13_000000_create_agent_reflections_table.php` | Reflection Tier 2 | `cortex-reflection-engine` |
-| `2026_06_10_000001_create_agent_strategic_goal_metrics_table.php` | Alinhamento estratégico | `cortex-strategic-alignment` |
-| `2026_02_04_210047_create_tenant_strategic_goals_table.php` | Alinhamento estratégico | `cortex-strategic-alignment` |
-| `2026_01_01_000005_create_agent_kb_proposals_table.php` | Pipeline de Knowledge Base | `cortex-kb-pipeline` |
-| `AllProvidersFailedException.php`, `ContextDeserializationException.php`, `CriticalEffectFailedException.php`, `ExecutionNotCompletedException.php`, `ExecutionNotFoundException.php`, `ExecutionSealedException.php` | Excepções do núcleo da FSM/execução | `cortex-fsm-kernel` |
-
-Manter este artigo restrito ao que ele realmente afirma evita o problema
-inverso de um repo "tudo numa pasta só": quem vier validar uma afirmação
-específica encontra exactamente o ficheiro que a sustenta, não 18 ficheiros
-de subsistemas diferentes.
+Ficheiros de outros subsistemas do CortexOS (núcleo da FSM, Reflection
+Tier 2, alinhamento estratégico, pipeline de Knowledge Base, e as suas
+excepções) continuam fora desta pasta, por pertencerem a artigos
+futuros: `cortex-fsm-kernel`, `cortex-reflection-engine`,
+`cortex-strategic-alignment`, `cortex-kb-pipeline`.

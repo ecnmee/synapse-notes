@@ -24,6 +24,15 @@ interface ProceduralMemoryInterface
         string $impactLevel = 'low',
     ): void;
 
+    public function bootstrapCandidate(
+        int    $tenantId,
+        string $trigger,
+        array  $workflow,
+        float  $successRate,
+        int    $sampleSize,
+        string $impactLevel = 'low',
+    ): void;
+
     public function recordOutcome(int $tenantId, string $trigger, bool $success): void;
 
     public function deactivate(int $tenantId, string $trigger): void;

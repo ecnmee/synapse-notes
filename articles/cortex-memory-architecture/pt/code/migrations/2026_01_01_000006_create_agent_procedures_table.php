@@ -7,11 +7,17 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Pipeline de activação: candidate → scored → validated → active | pending_approval
+ * Cria a tabela `agent_procedures`.
  *
- * Nenhum procedimento é activado directamente.
- * impact_level = 'low'  → activa automaticamente quando métricas são atingidas.
- * impact_level = 'high' → requer aprovação humana (status pending_approval).
+ * Pipeline de activação: candidate → scored → active | pending_approval
+ *
+ * Nota: o estado 'validated' foi removido do pipeline — nunca existiu
+ * um componente a operar a transição scored → validated. Era um estado
+ * fantasma que criava inconsistência entre o pipeline documentado e o real.
+ *
+ * Nenhum procedimento é activado directamente:
+ *   impact_level = 'low'  → activa automaticamente quando métricas são atingidas.
+ *   impact_level = 'high' → requer aprovação humana (status pending_approval).
  *
  * @package Database\Migrations\V2\Agent
  * @author  Eduardo Costa Nkuansambu
@@ -31,7 +37,7 @@ return new class extends Migration
             $table->unsignedInteger('sample_size')->default(0);
             // low | high
             $table->string('impact_level', 16)->default('low');
-            // candidate | scored | validated | active | pending_approval | deprecated
+            // candidate | scored | active | pending_approval | deprecated
             $table->string('status', 32)->default('candidate')->index();
             $table->string('version', 8)->default('v2')->index();
             $table->timestamps();
