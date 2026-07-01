@@ -3,6 +3,27 @@
 Tracks substantive edits to the article, not the original draft as written.
 Tag naming follows [`/VERSIONING.md`](../../VERSIONING.md).
 
+## v0.8, feat: add English code translations (en/code/)
+
+- supersedes: `articles/cortex-memory-architecture/v0.7`
+- Added `en/code/Memory/` with all 19 PHP files translated to English
+  comments and docblocks (code, class names, method names and variables
+  unchanged): `MemoryBus`, `MemoryBusInterface`, `WorkingMemory`,
+  `WorkingMemoryInterface`, `EpisodicMemory`, `EpisodicMemoryInterface`,
+  `SemanticMemory`, `SemanticValidator`, `SemanticConflictResolver`,
+  `ConflictResolution`, `ProceduralMemory`, `ProceduralMemoryInterface`,
+  `ProceduralHealthMonitor`, `Policy/PolicyObservationRepository`, and
+  all 5 files under `Episodic/` (`Episode`, `EpisodeOutcome`,
+  `EpisodeRepository`, `EpisodeRepositoryInterface`,
+  `EpisodeToolTraceRepository`).
+- Added `en/code/migrations/` with all 6 migrations translated to
+  English docblocks, identical filenames and schema to `pt/code/migrations/`.
+- Added `en/code/README.md` with the file-to-claim mapping in English,
+  mirroring `pt/code/README.md`.
+- Updated `en/README.md` from a blank placeholder to reflect that the
+  code is ready; the article text (en/article.md) is still pending
+  review before publication.
+
 ## v0.7, feat: sync code with P5.1 (conflict resolution, procedural health monitor)
 
 - supersedes: `articles/cortex-memory-architecture/v0.6`
