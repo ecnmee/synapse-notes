@@ -3,6 +3,20 @@
 Tracks substantive edits to the article, not the original draft as written.
 Tag naming follows [`/VERSIONING.md`](../../VERSIONING.md).
 
+## v1.0, feat: English article and REFERENCES.md complete
+
+- supersedes: `articles/cortex-memory-architecture/v0.9`
+- Added `en/article.md`: full English translation of the article, same
+  structure, technical claims, diagram references, P5.1 evolution note
+  and closing CTA as the Portuguese version. `medium_url` set to
+  `pending`, update after publication.
+- Added `en/REFERENCES.md`: full bibliography in English, mirroring
+  `pt/REFERENCES.md`, including the updated MemoryBank note reflecting
+  the now-implemented `ProceduralHealthMonitor`.
+- Updated `pt/article.md` frontmatter: `companion` now points to
+  `../en/article.md` instead of the previous placeholder.
+- Updated `en/README.md`: reflects that the article is ready to publish.
+
 ## v0.8, feat: add English code translations (en/code/)
 
 - supersedes: `articles/cortex-memory-architecture/v0.7`

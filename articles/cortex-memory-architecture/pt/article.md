@@ -4,7 +4,7 @@ version: v0.7
 date: 2026-06-21
 supersedes: articles/cortex-memory-architecture/v0.6
 lang: pt-AO
-companion: pending (ver ../en/README.md)
+companion: ../en/article.md
 references: ./REFERENCES.md
 medium_url: https://medium.com/@ecnmee/as-4-camadas-de-mem%C3%B3ria-que-podem-mudar-a-forma-como-constru%C3%ADmos-agentes-de-ia-24ad18c26dd0
 ---
