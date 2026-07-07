@@ -1,0 +1,96 @@
+<svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#555"/>
+    </marker>
+    <marker id="ah3r" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/>
+    </marker>
+    <marker id="ah3g" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="ah3o" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#f97316"/>
+    </marker>
+  </defs>
+  <rect width="900" height="460" fill="#fafafa"/>
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#111">FSM do CortexOS - Guardas nas transicoes</text>
+
+  <!-- State boxes: main cycle -->
+  <rect x="370" y="55" width="110" height="36" rx="8" fill="#1f2937"/>
+  <text x="425" y="78" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">PLAN</text>
+
+  <rect x="370" y="130" width="120" height="36" rx="8" fill="#374151"/>
+  <text x="430" y="153" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">POLICY CHECK</text>
+
+  <rect x="375" y="205" width="110" height="36" rx="8" fill="#374151"/>
+  <text x="430" y="228" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">ACT</text>
+
+  <rect x="375" y="280" width="110" height="36" rx="8" fill="#374151"/>
+  <text x="430" y="303" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">OBSERVE</text>
+
+  <rect x="375" y="355" width="110" height="36" rx="8" fill="#374151"/>
+  <text x="430" y="378" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">REFLECT</text>
+
+  <rect x="353" y="418" width="154" height="36" rx="8" fill="#374151"/>
+  <text x="430" y="441" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">UPDATE MEMORY</text>
+
+  <!-- COMPLETE -->
+  <rect x="720" y="205" width="110" height="36" rx="8" fill="#16a34a"/>
+  <text x="775" y="228" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">COMPLETE</text>
+
+  <!-- HANDOFF REQUESTED -->
+  <rect x="50" y="205" width="140" height="36" rx="8" fill="#f97316"/>
+  <text x="120" y="228" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">HANDOFF REQ.</text>
+
+  <!-- Arrows: main path -->
+  <line x1="430" y1="91" x2="430" y2="130" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="560" y="117" font-size="10" fill="#555" font-family="monospace">plan.has_selected_tool</text>
+
+  <line x1="430" y1="166" x2="430" y2="205" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="560" y="192" font-size="10" fill="#555" font-family="monospace">policy.permitted</text>
+
+  <line x1="430" y1="241" x2="430" y2="280" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="560" y="266" font-size="10" fill="#555" font-family="monospace">tool_result.received</text>
+
+  <line x1="430" y1="316" x2="430" y2="355" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <line x1="430" y1="391" x2="430" y2="418" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <!-- UPDATE_MEMORY → PLAN (loop) -->
+  <path d="M353,436 C280,436 280,73 370,73" fill="none" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="238" y="290" font-size="10" fill="#555" font-family="monospace" transform="rotate(-90,238,290)">NOT goals.all_resolved AND NOT max_iterations_reached</text>
+
+  <!-- UPDATE_MEMORY → COMPLETE -->
+  <path d="M507,436 C630,436 730,310 775,241" fill="none" stroke="#16a34a" stroke-width="2" marker-end="url(#ah3g)"/>
+  <text x="650" y="415" font-size="10" fill="#16a34a" font-family="monospace">goals.all_resolved OR max_iterations_reached</text>
+
+  <!-- POLICY_CHECK → COMPLETE (denied) -->
+  <line x1="490" y1="148" x2="720" y2="215" stroke="#dc2626" stroke-width="2" marker-end="url(#ah3r)"/>
+  <text x="620" y="162" font-size="10" fill="#dc2626" font-family="monospace">policy.denied</text>
+
+  <!-- ACT → HANDOFF -->
+  <line x1="375" y1="223" x2="190" y2="223" stroke="#f97316" stroke-width="2" marker-end="url(#ah3o)"/>
+  <text x="240" y="213" font-size="9" fill="#f97316" font-family="monospace">tool_result.requests_handoff</text>
+  <text x="240" y="243" font-size="9" fill="#f97316" font-family="monospace">OR consecutive_failures >= 2</text>
+
+  <!-- HANDOFF REQ → COMPLETE timeout -->
+  <path d="M120,241 C120,280 650,280 720,223" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#ah3r)"/>
+  <text x="320" y="298" font-size="9" fill="#dc2626" font-family="monospace">timer.expired</text>
+
+  <!-- HANDOFF ACTIVE → PLAN -->
+  <path d="M120,241 C50,241 50,73 370,73" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#ah3o)"/>
+  <text x="42" y="160" font-size="9" fill="#f97316" font-family="monospace" transform="rotate(-90,42,160)">operator.replied</text>
+
+  <!-- Legend -->
+  <rect x="600" y="310" width="270" height="120" rx="8" fill="#fff" stroke="#e5e7eb"/>
+  <text x="735" y="335" text-anchor="middle" font-size="12" fill="#374151" font-weight="700">Legenda</text>
+  <line x1="620" y1="352" x2="660" y2="352" stroke="#555" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="670" y="356" font-size="11" fill="#555">Fluxo normal</text>
+  <line x1="620" y1="375" x2="660" y2="375" stroke="#16a34a" stroke-width="2" marker-end="url(#ah3g)"/>
+  <text x="670" y="379" font-size="11" fill="#16a34a">Terminar (sucesso)</text>
+  <line x1="620" y1="398" x2="660" y2="398" stroke="#dc2626" stroke-width="2" marker-end="url(#ah3r)"/>
+  <text x="670" y="402" font-size="11" fill="#dc2626">Terminar (falha/bloqueio)</text>
+  <line x1="620" y1="421" x2="660" y2="421" stroke="#f97316" stroke-width="2" marker-end="url(#ah3o)"/>
+  <text x="670" y="425" font-size="11" fill="#f97316">Handoff</text>
+</svg>
