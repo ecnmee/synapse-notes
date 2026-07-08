@@ -1,50 +1,50 @@
 ---
 type: feat
-version: v0.1
-date: 2026-07-05
-supersedes: none
+version: v0.3
+date: 2026-07-08
+supersedes: articles/cortex-guard-dsl/v0.2
 lang: pt-AO
 companion: pending
 references: ./REFERENCES.md
 medium_url: pending
 ---
 
-# A Mini-Linguagem que Controla as Transicoes da FSM do CortexOS
+# A Mini-Linguagem que Controla as Transições da FSM do CortexOS
 
 *[Read in English](../en/article.md)*
 
-Quando a FSM do CortexOS precisou de transicoes com condicoes compostas, tinha uma escolha: hardcodar `if` aninhados ou construir algo que se lesse como texto. Escolhi a segunda opcao. Este artigo documenta o porque e o como.
+Quando a FSM do CortexOS precisou de transições com condições compostas, tinha uma escolha: hardcodar `if` aninhados ou construir algo que se lesse como texto. Escolhi a segunda opção. Este artigo documenta o porquê e o como.
 
-## O Problema Com Condicoes de Transicao
+## O Problema Com Condições de Transição
 
-Uma Finite State Machine (FSM) simples tem transicoes simples. `if (estado == A) vai para B`. Mas quando o agente precisa de decidir se transita de ACT para HANDOFF com base em mais do que um criterio, a coisa fica diferente.
+Uma Finite State Machine (FSM) simples tem transições simples. `if (estado == A) vai para B`. Mas quando o agente precisa de decidir se transita de ACT para HANDOFF com base em mais do que um critério, a coisa fica diferente.
 
-No CortexOS, a transicao de ACT para HANDOFF_REQUESTED deve acontecer quando:
+No CortexOS, a transição de ACT para HANDOFF_REQUESTED deve acontecer quando:
 
 - A tool pediu handoff explicitamente, **OU**
 - Houve pelo menos 2 falhas consecutivas
 
-E a transicao de HANDOFF_REQUESTED para HANDOFF_ACTIVE deve acontecer apenas quando:
+E a transição de HANDOFF_REQUESTED para HANDOFF_ACTIVE deve acontecer apenas quando:
 
 - O operador aceitou, **E**
-- O temporizador ainda nao expirou
+- O temporizador ainda não expirou
 
-Como exprimir isto? A alternativa mais directa e esta:
+Como exprimir isto? A alternativa mais directa é esta:
 
 ```php
-// Hardcoded numa funcao de transicao
+// Hardcoded numa função de transição
 if ($signals->toolResultRequestsHandoff || $metrics->consecutiveFailures >= 2) {
     $this->transitionTo(AgentState::HANDOFF_REQUESTED);
 }
 ```
 
-Funciona. Mas agora imagina 15 transicoes, algumas com 3 ou 4 condicoes. O mapa de estados fica enterrado em logica condicional. Para perceber o que a FSM faz, tes de ler codigo PHP, nao um mapa declarativo. Testar uma condicao especifica obriga a instanciar toda a cadeia.
+Funciona. Mas agora imagina 15 transições, algumas com 3 ou 4 condições. O mapa de estados fica enterrado em lógica condicional. Para perceber o que a FSM faz, tens de ler código PHP, não um mapa declarativo. Testar uma condição específica obriga a instanciar toda a cadeia.
 
-O CortexOS resolveu isto com uma linguagem de expressao minimalista.
+O CortexOS resolveu isto com uma linguagem de expressão minimalista.
 
-## A Abordagem: Expressoes de Guarda como Texto
+## A Abordagem: Expressões de Guarda como Texto
 
-No `TransitionMap`, cada transicao declara as suas guardas como strings:
+No `TransitionMap`, cada transição declara as suas guardas como strings:
 
 ```php
 $define(
@@ -69,9 +69,9 @@ $define(
 );
 ```
 
-Estas strings sao a linguagem de guarda. O sistema compila-as para ASTs em boot-time e avalia-as em runtime sem voltar a parsear texto.
+Estas strings são a linguagem de guarda. O sistema compila-as para ASTs em boot-time e avalia-as em runtime sem voltar a parsear texto.
 
-## A Gramatica (5 Regras)
+## A Gramática (5 Regras)
 
 ```
 expression  ::= or_expr
@@ -81,15 +81,15 @@ not_expr    ::= "NOT" not_expr | "(" expression ")" | atom
 atom        ::= identifier ">=" integer | identifier
 ```
 
-E tudo. Operadores em maiusculas. Precedencia: NOT > AND > OR. Parenteses sobrepoe.
+É tudo. Operadores em maiúsculas. Precedência: NOT > AND > OR. Parênteses sobrepõem.
 
 ![Pipeline de guardas do CortexOS](./diagrams/01-guard-pipeline.svg)
 
 ## O Pipeline: Parse em Boot, Avalia em Runtime
 
-O sistema tem uma separacao clara entre o que acontece no arranque e o que acontece em runtime.
+O sistema tem uma separação clara entre o que acontece no arranque e o que acontece em runtime.
 
-**Boot-time:** O `GuardParser` recebe cada expressao, tokeniza, e constroi uma AST imutavel (`CompiledGuard`). Se a expressao tiver sintaxe invalida ou referenciar um identificador desconhecido, lanca `InvalidGuardExpressionException` imediatamente. A aplicacao nao arranca com um mapa de transicoes corrompido.
+**Boot-time:** O `GuardParser` recebe cada expressão, tokeniza, e constrói uma AST imutável (`CompiledGuard`). Se a expressão tiver sintaxe inválida ou referenciar um identificador desconhecido, lança `InvalidGuardExpressionException` imediatamente. A aplicação não arranca com um mapa de transições corrompido.
 
 ```php
 // Acontece uma vez no construtor do TransitionMap
@@ -99,10 +99,10 @@ $compiled = array_map(
 );
 ```
 
-**Runtime:** O `GuardEvaluator` percorre a AST recursivamente. Quando encontra um no folha, delega ao `GuardRegistry`, que le os valores reais dos sinais e metricas.
+**Runtime:** O `GuardEvaluator` percorre a AST recursivamente. Quando encontra um nó folha, delega ao `GuardRegistry`, que lê os valores reais dos sinais e métricas.
 
 ```php
-// Avaliacao de um no na AST
+// Avaliação de um nó na AST
 return match ($node->type) {
     GuardNodeType::Signal    => $this->registry->evaluate($node->identifier, $ctx),
     GuardNodeType::Threshold => $this->registry->evaluate(
@@ -118,40 +118,40 @@ return match ($node->type) {
 
 O AND e o OR avaliam em short-circuit, tal como no PHP nativo.
 
-![Gramatica e arvore de expressao](./diagrams/02-grammar-and-ast.svg)
+![Gramática e árvore de expressão](./diagrams/02-grammar-and-ast.svg)
 
-## Os Atomos: Sinais e Thresholds
+## Os Átomos: Sinais e Thresholds
 
-A linguagem tem dois tipos de atomo:
+A linguagem tem dois tipos de átomo:
 
-**Sinais** sao flags booleanas transitórias produzidas durante cada iteracao da FSM. Exemplos:
+**Sinais** são flags booleanas transitórias produzidas durante cada iteração da FSM. Exemplos:
 
 ```
-policy.permitted              -- a policy engine aprovou a execucao
+policy.permitted              -- a policy engine aprovou a execução
 tool_result.received          -- a tool retornou resultado
 operator.accepted             -- o operador aceitou o handoff
 goals.all_resolved            -- todos os goals activos foram resolvidos
-max_iterations_reached        -- limite de 10 iteracoes atingido
+max_iterations_reached        -- limite de 10 iterações atingido
 ```
 
-**Thresholds** sao comparacoes numericas contra metricas acumuladas:
+**Thresholds** são comparações numéricas contra métricas acumuladas:
 
 ```
 consecutive_failures >= 2     -- duas ou mais falhas seguidas
 ```
 
-A separacao nao e apenas conceptual: o `GuardParser` trata os dois tipos de forma diferente, e o `GuardRegistry` tem listas distintas para cada um. Isto impede que um sinal booleano seja usado em posicao de threshold (`operator.accepted >= 2` seria invalido e explode em boot-time).
+A separação não é apenas conceptual: o `GuardParser` trata os dois tipos de forma diferente, e o `GuardRegistry` tem listas distintas para cada um. Isto impede que um sinal booleano seja usado em posição de threshold (`operator.accepted >= 2` seria inválido e explode em boot-time).
 
 ## Onde Cada Sinal Vem
 
-O `GuardContext` agrega quatro fontes de informacao:
+O `GuardContext` agrega quatro fontes de informação:
 
-- `RuntimeSignals`: flags transitórias da iteracao corrente (produzidas pelo CortexAgent durante `runActState()`, `runPolicyCheckState()`, etc.)
-- `ExecutionMetrics`: contadores acumulados (iteracoes, falhas consecutivas, retries)
-- `AgentContext`: estado cognitivo persistente (goals activos, politicas, persona)
+- `RuntimeSignals`: flags transitórias da iteração corrente (produzidas pelo CortexAgent durante `runActState()`, `runPolicyCheckState()`, etc.)
+- `ExecutionMetrics`: contadores acumulados (iterações, falhas consecutivas, retries)
+- `AgentContext`: estado cognitivo persistente (goals activos, políticas, persona)
 - `AgentExecution`: campos do modelo de base de dados
 
-O `GuardRegistry` sabe de onde ler cada sinal. A logica de resolucao fica centralizada num so lugar:
+O `GuardRegistry` sabe de onde ler cada sinal. A lógica de resolução fica centralizada num só lugar:
 
 ```php
 return match ($guard) {
@@ -163,14 +163,14 @@ return match ($guard) {
 };
 ```
 
-## O Mapa Completo das Transicoes
+## O Mapa Completo das Transições
 
-![FSM do CortexOS com guardas nas transicoes](./diagrams/03-fsm-transitions.svg)
+![FSM do CortexOS com guardas nas transições](./diagrams/03-fsm-transitions.svg)
 
-O mapa declara todas as transicoes validas, com as guardas que as protegem, os efeitos criticos (sincronos, dentro da transaccao de base de dados) e os efeitos diferidos (jobs assincronos). Se um efeito critico falhar, a transicao falha e o estado nao avanca.
+O mapa declara todas as transições válidas, com as guardas que as protegem, os efeitos críticos (síncronos, dentro da transacção de base de dados) e os efeitos diferidos (jobs assíncronos). Se um efeito crítico falhar, a transição falha e o estado não avança.
 
 ```php
-// Transicao com efeito critico e diferido
+// Transição com efeito crítico e diferido
 $define(
     AgentState::UPDATE_MEMORY,
     AgentState::PLAN,
@@ -178,36 +178,36 @@ $define(
         'NOT goals.all_resolved',
         'NOT max_iterations_reached',
     ],
-    critical: ['persist_memory_updates'],  // falha bloqueia transicao
+    critical: ['persist_memory_updates'],  // falha bloqueia transição
     deferred: [],
 );
 ```
 
 ## O que Esta Abordagem Ganha
 
-**Legibilidade.** O `TransitionMap` lê-se como especificacao, nao como codigo de controlo. Para perceber o que a FSM faz, basta ler as strings de guarda.
+**Legibilidade.** O `TransitionMap` lê-se como especificação, não como código de controlo. Para perceber o que a FSM faz, basta ler as strings de guarda.
 
-**Fail fast.** Expressao invalida - seja por typo num identificador ou por sintaxe incorrecta - lanca excepcao no arranque, nao numa transicao em producao.
+**Fail fast.** Expressão inválida, seja por typo num identificador ou por sintaxe incorrecta, lança excepção no arranque, não numa transição em produção.
 
-**Testabilidade.** O `GuardEvaluator`, o `GuardParser` e o `GuardRegistry` sao testáveis de forma completamente independente. Para testar uma guarda especifica, basta construir um `GuardContext` com os valores desejados - sem instanciar o `CortexAgent`, sem base de dados, sem LLM.
+**Testabilidade.** O `GuardEvaluator`, o `GuardParser` e o `GuardRegistry` são testáveis de forma completamente independente. Para testar uma guarda específica, basta construir um `GuardContext` com os valores desejados, sem instanciar o `CortexAgent`, sem base de dados, sem LLM.
 
-**Extensao sem risco.** Adicionar um novo sinal requer tres passos: adicionar a constante ao `GuardSignals`, adicionar ao `KNOWN_SIGNALS` do `GuardRegistry`, e implementar a resolucao no `evaluate()`. O parser e o evaluator ficam intocados.
+**Extensão sem risco.** Adicionar um novo sinal requer três passos: adicionar a constante ao `GuardSignals`, adicionar ao `KNOWN_SIGNALS` do `GuardRegistry`, e implementar a resolução no `evaluate()`. O parser e o evaluator ficam intocados.
 
-## O Que Esta Abordagem Nao Faz
+## O Que Esta Abordagem Não Faz
 
-Nao e uma linguagem de proposito geral. Nao tem variaveis, funcoes, loops ou tipos. E especificamente desenhada para exprimir condicoes booleanas compostas sobre um conjunto fixo de sinais e metricas.
+Não é uma linguagem de propósito geral. Não tem variáveis, funções, loops ou tipos. É especificamente desenhada para exprimir condições booleanas compostas sobre um conjunto fixo de sinais e métricas.
 
-Tambem nao avalia expressoes arbitrarias em runtime. O conjunto de sinais e fechado: adicionar um novo sinal requer mudanca de codigo, nao apenas uma string diferente na expressao de guarda. Isto e uma decisao deliberada de seguranca.
+Também não avalia expressões arbitrárias em runtime. O conjunto de sinais é fechado: adicionar um novo sinal requer mudança de código, não apenas uma string diferente na expressão de guarda. Isto é uma decisão deliberada de segurança.
 
 ## Referências
 
 Ver [`REFERENCES.md`](./REFERENCES.md).
 
-Para o codigo completo, incluindo `TransitionMap` com todas as transicoes declaradas:
+Para o código completo, incluindo `TransitionMap` com todas as transições declaradas:
 https://github.com/ecnmee/synapse-notes/tree/main/articles/cortex-guard-dsl/pt/code
 
 ---
 
-Usas FSMs em producao? Como resolves as condicoes de transicao compostas?
+Usas FSMs em produção? Como resolves as condições de transição compostas?
 
 Deixa nos comentários.
